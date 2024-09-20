@@ -29,9 +29,28 @@ const LoginPage = () => {
         }
       );
 
-      console.log("Resposta do backend:", response.data); // Log da resposta
+      console.log(
+        "Resposta do backend acess_token:",
+        response.data.access_token
+      ); // Log da resposta
+      console.log(
+        "Resposta do backend refresh_token:",
+        response.data.refresh_token
+      );
 
-      localStorage.setItem("token", response.data.access_token);
+      if (response.data.access_token) {
+        localStorage.setItem("token", response.data.access_token);
+      }
+
+      if (response.data.refresh_token) {
+        localStorage.setItem("refresh_token", response.data.refresh_token);
+      }
+
+      if (response.data.user) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+      }
+
+      // Redireciona o usuário para a página inicial
       router.push("/dashboard");
     } catch (error) {
       console.error("Erro no login:", error); // Log do erro

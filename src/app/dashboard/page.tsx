@@ -9,9 +9,24 @@ const DashboardPage = () => {
   const router = useRouter();
   const [protectedData, setProtectedData] = useState(null);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     // Remove o token JWT do localStorage
     localStorage.removeItem("token");
+    localStorage.removeItem("refresh_Token");
+
+    // Opcional: chamar o backend para invalidar o refresh token
+    try {
+      const refreshToken = localStorage.getItem("refresh_token");
+      await fetch("http://localhost:3001/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+    }
 
     // Redireciona o usuário para a página de login
     router.push("/login");
@@ -25,6 +40,15 @@ const DashboardPage = () => {
       router.push("/login");
     } else {
       if (token) {
+        const decodedToken: any = jwtDecode(token);
+
+        // Verifica se o token já expirou
+        const now = Date.now() / 1000; // Tempo atual em segundos
+        if (decodedToken.exp < now) {
+          localStorage.removeItem("token");
+          router.push("/login"); // Redireciona para o login se o token expirou
+        }
+
         // Busca os dados protegidos
         console.log("Token Dashboard:", token);
         axios
