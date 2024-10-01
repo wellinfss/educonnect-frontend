@@ -3,11 +3,22 @@ import React, { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import api from "@/services/api";
 
 const DashboardPage = () => {
   const [user, setUser] = useState<{ username: string } | null>(null); // Define o tipo de usuário
   const router = useRouter();
   const [protectedData, setProtectedData] = useState(null);
+  const [data, setData] = useState(null);
+
+  const fetchData = async () => {
+    try {
+      const response = await api.get("/user/profile"); // Rota protegida
+      setData(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar os dados:", error);
+    }
+  };
 
   const handleLogout = async () => {
     // Remove o token JWT do localStorage
@@ -17,7 +28,7 @@ const DashboardPage = () => {
     // Opcional: chamar o backend para invalidar o refresh token
     try {
       const refreshToken = localStorage.getItem("refresh_token");
-      await fetch("http://localhost:3001/api/auth/logout", {
+      await fetch("http://localhost:3001/api/protected-data/getProtectedData", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -51,7 +62,7 @@ const DashboardPage = () => {
 
         // Busca os dados protegidos
         console.log("Token Dashboard:", token);
-        axios
+        api
           .get("http://localhost:3001/api/protected-data/getProtectedData", {
             headers: {
               Authorization: `Bearer ${token}`, // Envia o token no cabeçalho da requisição
@@ -85,6 +96,7 @@ const DashboardPage = () => {
   return (
     <div>
       <h1>Bem-vindo à Dashboard, {user.username}!</h1>{" "}
+      <button onClick={fetchData}>Buscar Dados Protegidos</button>
       {protectedData ? (
         <div>Dados Protegidos: {JSON.stringify(protectedData)}</div>
       ) : (

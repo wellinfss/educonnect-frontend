@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import api from "../../services/api";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -16,7 +17,7 @@ const LoginPage = () => {
     console.log("Enviando credenciais:", { username, password }); // Log das credenciais
 
     try {
-      const response = await axios.post(
+      const response = await api.post(
         "http://localhost:3001/api/auth/login",
         {
           username,
